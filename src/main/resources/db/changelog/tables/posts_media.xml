@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+
+    <changeSet id="03" author="ganesh">
+        <preConditions>
+            <not>
+                <tableExists tableName="posts_media" />
+            </not>
+        </preConditions>
+        <createTable tableName="posts_media">
+            <column name="id" type="BIGINT">
+                <constraints unique="true" nullable="false" primaryKey="true" />
+            </column>
+
+            <column name="media_url" type="TEXT" />
+            <column name="media_type" type="TEXT" />
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false" />
+            </column>
+            <column name="updated_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false" />
+            </column>
+            <column name="post_id" type="BIGINT">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint baseTableName="posts_media" baseColumnNames="post_id"
+            constraintName="fk_posts_media" referencedTableName="posts" referencedColumnNames="id" />
+    </changeSet>
+
+</databaseChangeLog>
