@@ -14,7 +14,4 @@
     <include file="tables/group_members.xml" relativeToChangelogFile="true"/>
     <include file="tables/group_roles.xml" relativeToChangelogFile="true"/>
     <include file="tables/group_posts.xml" relativeToChangelogFile="true"/>
-
-
-
 </databaseChangeLog>

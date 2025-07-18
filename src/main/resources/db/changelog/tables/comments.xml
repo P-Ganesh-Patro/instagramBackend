@@ -1,13 +1,17 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <databaseChangeLog
-    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd"
->
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.31.xsd">
 
     <changeSet id="04" author="ganesh">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="comments"/>
+            </not>
+        </preConditions>
+
         <createTable tableName="comments">
-            <column name="id" type="BIGINT">
+            <column name="id" type="BIGINT" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false" unique="true"/>
             </column>
             <column name="user_id" type="BIGINT">
@@ -19,18 +23,45 @@
             <column name="comment" type="TEXT">
                 <constraints nullable="false"/>
             </column>
-            <column type="TIMESTAMP" name="created_at" defaultValueComputed="CURRENT_TIMESTAMP">
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
                 <constraints nullable="false"/>
             </column>
-            <column type="TIMESTAMP" name="updated_at" defaultValueComputed="CURRENT_TIMESTAMP">
+            <column name="updated_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
                 <constraints nullable="false"/>
             </column>
-
-            <column type="TIMESTAMP" name="deleted_at" defaultValueComputed="CURRENT_TIMESTAMP">
-                <constraints nullable="false"/>
-            </column>
-
+            <column name="deleted_at" type="TIMESTAMP"/>
         </createTable>
+
+
+        <rollback>
+            <dropTable tableName="comments"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="11" author="">
+        <preConditions>
+            <tableExists tableName="comments"/>
+        </preConditions>
+        <addColumn tableName="comments">
+            <column name="parent_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <rollback>
+            <dropColumn tableName="comments" columnName="parent_id"/>
+        </rollback>
+
+
+    </changeSet>
+
+    <changeSet id="addForeignKey" author="ganesh">
+        <addForeignKeyConstraint baseTableName="comments" baseColumnNames="user_id" constraintName="fk_users_comment"
+                                 referencedTableName="users"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="comments" baseColumnNames="parent_id" constraintName="fk_comment_parent"
+                                 referencedTableName="posts"
+                                 referencedColumnNames="id"/>
     </changeSet>
 
 

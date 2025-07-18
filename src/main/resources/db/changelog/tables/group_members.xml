@@ -6,22 +6,22 @@
 >
 
     <changeSet id="08" author="ganesh">
-        <preConditions>
+        <preConditions onFail="MARK_RAN">
             <not>
                 <tableExists tableName="group_members"/>
             </not>
         </preConditions>
         <createTable tableName="group_members">
             <column name="id" type="BIGINT" autoIncrement="true">
-                <constraints nullable="false" primaryKey="true" />
+                <constraints nullable="false" primaryKey="true"/>
             </column>
 
-            <column name="user_id" type="BIGINT" >
-                <constraints nullable="false" />
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false"/>
             </column>
 
             <column name="role_id" type="BIGINT">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
 
             <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
@@ -33,5 +33,28 @@
             </column>
 
         </createTable>
+        <rollback>
+            <dropTable tableName="group_members"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="add_group_id" author="ganesh">
+        <addColumn tableName="group_members">
+            <column name="group_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet id="addForeignKey" author="ganesh">
+        <addForeignKeyConstraint baseTableName="group_members" baseColumnNames="user_id"
+                                 constraintName="fk_group_members_user_id" referencedTableName="users"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="group_members" baseColumnNames="group_id"
+                                 constraintName="fk_group_members_group_id" referencedTableName="groups"
+                                 referencedColumnNames="id"/>
+        <addForeignKeyConstraint baseTableName="group_members" baseColumnNames="role_id"
+                                 constraintName="fk_group_members_role_id" referencedTableName="group_roles"
+                                 referencedColumnNames="id"/>
     </changeSet>
 </databaseChangeLog>

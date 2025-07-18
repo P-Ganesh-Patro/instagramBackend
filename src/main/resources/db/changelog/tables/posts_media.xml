@@ -5,7 +5,7 @@
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
 
     <changeSet id="03" author="ganesh">
-        <preConditions>
+        <preConditions onFail="MARK_RAN">
             <not>
                 <tableExists tableName="posts_media" />
             </not>
@@ -28,8 +28,13 @@
             </column>
         </createTable>
 
+        <rollback>
+            <dropTable tableName="posts_media"/>
+        </rollback>
         <addForeignKeyConstraint baseTableName="posts_media" baseColumnNames="post_id"
             constraintName="fk_posts_media" referencedTableName="posts" referencedColumnNames="id" />
+
+
     </changeSet>
 
 </databaseChangeLog>

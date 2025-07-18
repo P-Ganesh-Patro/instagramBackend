@@ -2,30 +2,35 @@
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
-    
+
     <changeSet id="05" author="ganesh">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="reactions"/>
+            </not>
+        </preConditions>
         <createTable tableName="reactions">
 
             <column name="id" autoIncrement="true" type="BIGINT">
                 <constraints nullable="false" primaryKey="true"/>
             </column>
 
-            <column name="user_id"  type="BIGINT">
-                <constraints nullable="false" />
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false"/>
             </column>
 
-            <column name="reaction_type_id"  type="BIGINT">
-                <constraints nullable="false" />
-            </column>
-
-
-            <column name="parent_id"  type="BIGINT">
-                <constraints nullable="false" />
+            <column name="reaction_type_id" type="BIGINT">
+                <constraints nullable="false"/>
             </column>
 
 
-            <column name="parent_type"  type="TEXT">
-                <constraints nullable="false" />
+            <column name="parent_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+
+
+            <column name="parent_type" type="TEXT">
+                <constraints nullable="false"/>
             </column>
 
             <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
@@ -41,6 +46,23 @@
             </column>
 
         </createTable>
+        <rollback>
+            <dropTable tableName="reactions"/>
+        </rollback>
     </changeSet>
-    
+    <changeSet id="add_foreign_key" author="ganesh">
+        <addForeignKeyConstraint baseTableName="reactions" baseColumnNames="user_id"
+                                 constraintName="fk_reactions_user_id" referencedTableName="users"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="reactions" baseColumnNames="parent_id"
+                                 constraintName="fk_reactions_parent_id" referencedTableName="comments"
+                                 referencedColumnNames="id"/>
+
+
+        <addForeignKeyConstraint baseTableName="reactions" baseColumnNames="reaction_type_id"
+                                 constraintName="fk_reactions_type_id" referencedTableName="reaction_types"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
 </databaseChangeLog>
