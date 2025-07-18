@@ -4,7 +4,7 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd"
 >
     <changeSet id="09" author="ganesh">
-        <preConditions>
+        <preConditions onFail="MARK_RAN">
             <not>
                 <tableExists tableName="group_roles"/>
             </not>
@@ -27,6 +27,9 @@
             <column name="updated_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP"/>
 
         </createTable>
+        <rollback>
+            <dropTable tableName="group_roles"/>
+        </rollback>
     </changeSet>
 
 

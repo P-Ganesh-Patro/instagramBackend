@@ -6,7 +6,7 @@
 >
 
     <changeSet id="10" author="ganesh">
-        <preConditions>
+        <preConditions onFail="MARK_RAN">
             <not>
                 <tableExists tableName="group_posts"/>
             </not>
@@ -35,7 +35,23 @@
 
 
         </createTable>
-    </changeSet>
 
+        <rollback>
+            <dropTable tableName="group_posts"/>
+        </rollback>
+    </changeSet>
+    <changeSet id="addForeignKey" author="ganesh">
+        <addForeignKeyConstraint baseTableName="group_posts" baseColumnNames="user_id"
+                                 constraintName="fk_group_posts_user_id" referencedTableName="users"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="group_posts" baseColumnNames="post_id"
+                                 constraintName="fk_group_posts_post_id" referencedTableName="posts"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="group_posts" baseColumnNames="group_id"
+                                 constraintName="fk_group_posts_group_id" referencedTableName="groups"
+                                 referencedColumnNames="id"/>
+    </changeSet>
 
 </databaseChangeLog>

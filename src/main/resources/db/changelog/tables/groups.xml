@@ -8,19 +8,19 @@
     <changeSet id="07" author="ganesh">
         <preConditions onFail="MARK_RAN">
             <not>
-                <tableExists tableName="groups" />
+                <tableExists tableName="groups"/>
             </not>
         </preConditions>
 
         <createTable tableName="groups">
             <column name="id" autoIncrement="true" type="BIGINT">
-                <constraints unique="true" nullable="false" primaryKey="true" />
+                <constraints unique="true" nullable="false" primaryKey="true"/>
             </column>
             <column name="created_by" type="TEXT">
                 <constraints nullable="false"/>
             </column>
             <column name="display_name" type="TEXT">
-                    <constraints nullable="false"/>
+                <constraints nullable="false"/>
             </column>
 
             <column name="description" type="TEXT">
@@ -28,14 +28,26 @@
             </column>
 
             <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="updated_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
 
         </createTable>
+        <rollback>
+            <dropTable tableName="groups"/>
+        </rollback>
 
+    </changeSet>
+    <changeSet id="modify_column_type" author="ganesh">
+        <modifyDataType tableName="groups" columnName="created_by" newDataType="BIGINT"/>
+    </changeSet>
+
+    <changeSet id="add_foreign_key" author="ganesh">
+        <addForeignKeyConstraint baseTableName="groups" baseColumnNames="created_by" constraintName="fk_created_user_id"
+                                 referencedTableName="users"
+                                 referencedColumnNames="id"/>
     </changeSet>
 
 
