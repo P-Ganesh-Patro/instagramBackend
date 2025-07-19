@@ -2,56 +2,68 @@
 <databaseChangeLog
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd"
->
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
 
-    <changeSet id="10" author="ganesh">
-        <preConditions onFail="MARK_RAN">
+    <changeSet id="group_post-table" author="ganesh"
+               runOnChange="false"
+               runAlways="false"
+    >
+
+        <preConditions onFail="MARK_RAN" onError="HALT">
             <not>
                 <tableExists tableName="group_posts"/>
             </not>
         </preConditions>
+
         <createTable tableName="group_posts">
-            <column name="id" type="BIGINT">
-                <constraints primaryKey="true" nullable="false" unique="true"/>
-            </column>
-            <column name="user_id" type="BIGINT">
-                <constraints nullable="false"/>
-            </column>
-            <column name="post_id" type="BIGINT">
-                <constraints nullable="false"/>
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
             </column>
 
             <column name="group_id" type="BIGINT">
                 <constraints nullable="false"/>
             </column>
 
-            <column type="TIMESTAMP" name="created_at" defaultValueComputed="CURRENT_TIMESTAMP">
-                <constraints nullable="false"/>
-            </column>
-            <column type="TIMESTAMP" name="updated_at" defaultValueComputed="CURRENT_TIMESTAMP">
+            <column name="user_id" type="BIGINT">
                 <constraints nullable="false"/>
             </column>
 
+            <column name="post_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
 
+            <column name="content" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="created_at" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="updated_at" type="DATETIME"/>
+            <column name="deleted_at" type="DATETIME"/>
         </createTable>
 
-        <rollback>
-            <dropTable tableName="group_posts"/>
-        </rollback>
+        <addForeignKeyConstraint
+                baseTableName="group_posts"
+                baseColumnNames="group_id"
+                constraintName="fk_group_post_group_id"
+                referencedTableName="groups"
+                referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint
+                baseTableName="group_posts"
+                baseColumnNames="user_id"
+                constraintName="fk_group_post_user_id"
+                referencedTableName="users"
+                referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint
+                baseTableName="group_posts"
+                baseColumnNames="post_id"
+                constraintName="fk_group_post_post_id"
+                referencedTableName="posts"
+                referencedColumnNames="id"/>
+
     </changeSet>
-    <changeSet id="addForeignKey" author="ganesh">
-        <addForeignKeyConstraint baseTableName="group_posts" baseColumnNames="user_id"
-                                 constraintName="fk_group_posts_user_id" referencedTableName="users"
-                                 referencedColumnNames="id"/>
-
-        <addForeignKeyConstraint baseTableName="group_posts" baseColumnNames="post_id"
-                                 constraintName="fk_group_posts_post_id" referencedTableName="posts"
-                                 referencedColumnNames="id"/>
-
-        <addForeignKeyConstraint baseTableName="group_posts" baseColumnNames="group_id"
-                                 constraintName="fk_group_posts_group_id" referencedTableName="groups"
-                                 referencedColumnNames="id"/>
-    </changeSet>
-
 </databaseChangeLog>

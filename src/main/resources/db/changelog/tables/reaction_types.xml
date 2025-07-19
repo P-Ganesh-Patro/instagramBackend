@@ -1,32 +1,59 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd"
->
-    <changeSet id="06" author="ganesh">
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.23.xsd">
+
+    <changeSet id="create-reaction-types" author="ganesh">
         <preConditions onFail="MARK_RAN">
             <not>
-                <tableExists tableName="reaction_types" />
+                <tableExists tableName="reaction_types"/>
             </not>
         </preConditions>
+
         <createTable tableName="reaction_types">
             <column name="id" type="BIGINT" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-
-            <column name="type" type="TEXT">
+            <column name="reaction_type" type="VARCHAR(50)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="created_at" type="DATETIME" defaultValueComputed="GETDATE()">
                 <constraints nullable="false"/>
             </column>
-
-            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP"/>
-            <column name="updated_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP"/>
-            <column name="deleted_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP"/>
-
+            <column name="updated_at" type="DATETIME"/>
+            <column name="deleted_at" type="DATETIME"/>
         </createTable>
+
         <rollback>
             <dropTable tableName="reaction_types"/>
         </rollback>
     </changeSet>
 
+    <changeSet id="insert-reaction-types" author="ganesh">
+        <insert tableName="reaction_types">
+            <column name="reaction_type" value="LIKE"/>
+        </insert>
+        <insert tableName="reaction_types">
+            <column name="reaction_type" value="CELEBRATE"/>
+        </insert>
+        <insert tableName="reaction_types">
+            <column name="reaction_type" value="HEART"/>
+        </insert>
+        <insert tableName="reaction_types">
+            <column name="reaction_type" value="FUNNY"/>
+        </insert>
+        <insert tableName="reaction_types">
+            <column name="reaction_type" value="INSIGHTFUL"/>
+        </insert>
+
+        <rollback>
+            <delete tableName="reaction_types">
+                <where>reaction_type IN ('LIKE', 'CELEBRATE', 'HEART', 'FUNNY', 'INSIGHTFUL')</where>
+            </delete>
+        </rollback>
+    </changeSet>
 
 </databaseChangeLog>
+
