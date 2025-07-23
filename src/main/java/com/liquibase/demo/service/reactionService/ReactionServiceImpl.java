@@ -1,80 +1,75 @@
-//package com.liquibase.demo.service.reactionService;
-//
-//import com.liquibase.demo.dto.ReactionDTO;
-//import com.liquibase.demo.model.Reaction;
-//import com.liquibase.demo.model.ReactionType;
-//import com.liquibase.demo.repository.ReactionRepository;
-//import com.liquibase.demo.repository.ReactionTypeRepository;
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.stereotype.Service;
-//
-//import java.time.LocalDateTime;
-//import java.util.List;
-//import java.util.Optional;
-//
-//@Service
-//public class ReactionServiceImpl implements ReactionService{
-//    @Autowired
-//    private ReactionRepository reactionRepository;
-//
-//    @Autowired
-//    private ReactionTypeRepository reactionTypeRepository;
-//
-//    @Override
-//    public Reaction saveReaction(ReactionDTO dto) {
-//        Reaction reaction = new Reaction();
-//        reaction.setUserId(dto.getUserId());
-//        reaction.setCommentId(dto.getCommentId());
-//        reaction.setReactedType(dto.getReactedType());
-//
-//        ReactionType type = reactionTypeRepository.findById(dto.getReactionTypeId())
-//                .orElseThrow(() -> new RuntimeException("Invalid ReactionType ID"));
-//
-//        reaction.setReactedType(type);
-//        reaction.setCreatedAt(LocalDateTime.now());
-//
-//        return reactionRepository.save(reaction);
-//    }
-//
-//    @Override
-//    public List<Reaction> getAllReactions() {
-//        return reactionRepository.findAll()
-//                .stream()
-//                .filter(r -> r.getDeletedAt() == null)
-//                .toList();
-//    }
-//
-//    @Override
-//    public Optional<Reaction> getReactionById(Long id) {
-//        return reactionRepository.findById(id)
-//                .filter(r -> r.getDeletedAt() == null);
-//    }
-//
-//    @Override
-//    public Reaction updateReaction(Long id, ReactionDTO dto) {
-//        return reactionRepository.findById(id)
-//                .filter(r -> r.getDeletedAt() == null)
-//                .map(reaction -> {
-//                    reaction.setReactedType(dto.getReactedType());
-//                    reaction.setUpdatedAt(LocalDateTime.now());
-//                    reaction.setUserId(dto.getUserId());
-//                    reaction.setCommentId(dto.getCommentId());
-//
-//                    ReactionType type = reactionTypeRepository.findById(dto.getReactionTypeId())
-//                            .orElseThrow(() -> new RuntimeException("Invalid ReactionType ID"));
-//
-//                    reaction.setReactionType(type);
-//
-//                    return reactionRepository.save(reaction);
-//                })
-//                .orElseThrow(() -> new RuntimeException("Reaction not found"));
-//    }
-//
-//    @Override
-//    public void softDeleteReaction(Long id) {
-//        reactionRepository.findById(id).ifPresent(reaction -> {
-//            reaction.setDeletedAt(LocalDateTime.now());
-//            reactionRepository.save(reaction);
-//        });
-//    }
-//}
+package com.liquibase.demo.service.reactionService;
+
+import com.liquibase.demo.dto.ReactionDTO;
+import com.liquibase.demo.dto.ReactionResponseDTO;
+import com.liquibase.demo.exception.UserNotFoundException;
+import com.liquibase.demo.model.Comment;
+import com.liquibase.demo.model.Reaction;
+import com.liquibase.demo.model.ReactionType;
+import com.liquibase.demo.model.User;
+import com.liquibase.demo.repository.CommentRepository;
+import com.liquibase.demo.repository.ReactionRepository;
+import com.liquibase.demo.repository.ReactionTypeRepository;
+import com.liquibase.demo.repository.UserRepository;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+@Service
+@AllArgsConstructor
+public class ReactionServiceImpl implements ReactionService {
+
+    private final ReactionRepository reactionRepository;
+    private final UserRepository userRepository;
+    private final CommentRepository commentRepository;
+    private final ReactionTypeRepository reactionTypeRepository;
+
+
+    @Override
+    public ReactionResponseDTO createReaction(ReactionDTO reactionDTO) {
+        User user = userRepository.findById(reactionDTO.getUserId()).orElseThrow(() -> new RuntimeException("user not found"));
+        Comment comment = commentRepository.findById(reactionDTO.getCommentId())
+                .orElseThrow(() -> new RuntimeException("Comment not found"));
+
+        ReactionType reactionType = reactionTypeRepository.findById(reactionDTO.getReactionTypeId())
+                .orElseThrow(() -> new RuntimeException("invalid reaction Id"));
+
+        Reaction reaction = new Reaction();
+        reaction.setUser(user);
+        reaction.setComment(comment);
+        reaction.setReactionType(reactionType);
+        reaction.setReactedType(reactionDTO.getReactedType());
+        reaction.setCreatedAt(LocalDateTime.now());
+        Reaction saved = reactionRepository.save(reaction);
+
+        return ReactionResponseDTO.builder()
+                .id(saved.getId())
+                .userName(user.getUserName())
+                .comment(comment.getComment())
+                .reactionType(reactionType.toString())
+                .reactedType(saved.getReactedType())
+                .createdAt(saved.getCreatedAt())
+                .build();
+    }
+
+    @Override
+    public List<ReactionResponseDTO> getReactionsByComment(Long commentId) {
+        List<Reaction> reactions = reactionRepository.findByCommentId(commentId);
+
+        return reactions.stream().map(reaction -> ReactionResponseDTO.builder()
+                .id(reaction.getId())
+                .userName(reaction.getUser().getUserName())
+                .comment(reaction.getComment().getComment())
+                .reactionType(reaction.getReactionType().toString())
+                .reactedType(reaction.getReactedType())
+                .createdAt(reaction.getCreatedAt())
+                .build()).collect(Collectors.toList());
+    }
+}
+

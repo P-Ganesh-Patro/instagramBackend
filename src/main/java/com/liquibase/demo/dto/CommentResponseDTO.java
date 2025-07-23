@@ -15,17 +15,15 @@ public class CommentResponseDTO {
     private Long postId;
     private String commentOnType;
     private String comment;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+//    private LocalDateTime createdAt;
+//    private LocalDateTime updatedAt;
 
-    public CommentResponseDTO(Long id, Long userId, Long postId, String commentOnType, String comment, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public CommentResponseDTO(Long id, Long userId, Long postId, String commentOnType, String comment) {
         this.id = id;
         this.userId = userId;
         this.postId = postId;
         this.commentOnType = commentOnType;
         this.comment = comment;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
 
     }
 

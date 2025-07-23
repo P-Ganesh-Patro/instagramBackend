@@ -1,21 +1,22 @@
 package com.liquibase.demo.service.userServices;
 
+import com.liquibase.demo.exception.UserNotFoundException;
 import com.liquibase.demo.model.User;
 import com.liquibase.demo.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.swing.text.html.Option;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
 
 @Service
+@AllArgsConstructor
 public class UserServiceImpl implements UserService {
 
-    @Autowired
-    private UserRepository userRepository;
+
+    private final UserRepository userRepository;
 
 
     @Override
@@ -23,32 +24,25 @@ public class UserServiceImpl implements UserService {
         return null;
     }
 
+
     @Override
-    public User createUser(User user) {
-        String username = user.getUserName();
-        String email = user.getEmail();
+    @Transactional
+    public User deleteUser(Long id) {
+        Optional<User> optionalUser = userRepository.findById(id);
 
-        String existingUserName = userRepository.findByUserName(username);
-        String existingEmail = userRepository.findByUserEmail(email);
-
-        if (existingUserName != null && existingUserName.equalsIgnoreCase(username)) {
-            throw new RuntimeException("Username already exists");
+        if (optionalUser.isEmpty()) {
+            throw new UserNotFoundException("User ID not found");
         }
 
-        if (existingEmail != null && existingEmail.equalsIgnoreCase(email)) {
-            throw new RuntimeException("Email already exists");
+        User user = optionalUser.get();
+
+        if (user.getDeletedAt() != null) {
+            throw new UserNotFoundException("User already deleted");
         }
 
+        user.setDeletedAt(LocalDateTime.now());
         return userRepository.save(user);
     }
-
-
-    @Override
-    public String deleteUser(Long id) {
-        userRepository.deleteById(id);
-        return "User deleted successfully";
-    }
-
     @Override
     public User updateUser(User user) {
         Optional<com.liquibase.demo.model.User> existingUserOptional = userRepository.findById(user.getId());
@@ -66,17 +60,6 @@ public class UserServiceImpl implements UserService {
         existingUser.setUpdatedAt(LocalDateTime.now());
 
         return userRepository.save(existingUser);
-    }
-
-    @Override
-    public ResponseEntity<User> loginUser(String usernameOrEmail, String password) {
-        User user = userRepository.findByUserNameOrEmailAndPassword(usernameOrEmail, password);
-
-        if (user == null) {
-            throw new RuntimeException("Invalid usernameOrEmail or password");
-        }
-
-        return ResponseEntity.ok(user);
     }
 
 

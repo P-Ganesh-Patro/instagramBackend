@@ -7,11 +7,10 @@ import com.liquibase.demo.exception.UserNotFoundException;
 import com.liquibase.demo.model.Post;
 import com.liquibase.demo.model.User;
 import com.liquibase.demo.response.APIResponse;
-import com.liquibase.demo.response.ResponseHandler;
+import com.liquibase.demo.service.authService.AuthServiceImpl;
 import com.liquibase.demo.service.postServices.PostService;
 import com.liquibase.demo.service.userServices.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.repository.query.Param;
+import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,25 +23,26 @@ import java.util.stream.Collectors;
 
 
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/api/posts")
+@AllArgsConstructor
 public class PostController {
 
 
-    @Autowired
-    private PostService postService;
+    private final PostService postService;
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
+
+    private final AuthServiceImpl authService;
 
 
-    @PostMapping("/post")
-    public ResponseEntity<APIResponse<PostsResponseDTO>> createPost(@RequestBody Post post, @RequestParam String userNameOrEmail, @RequestParam String password) {
+    @PostMapping()
+    public ResponseEntity<APIResponse<PostsResponseDTO>> createPosts(@RequestBody Post post, @RequestParam String userNameOrEmail, @RequestParam String password) {
         try {
-
-            User user = userService.loginUser(userNameOrEmail, password).getBody();
+            User user = authService.loginUser(userNameOrEmail, password).getBody();
 
             if (user != null) {
-                post.setUserId(user.getId());
+//                post.setUserId(user.getId());
+                post.setUser(user);
                 PostsResponseDTO postSaved = postService.createPost(post);
                 PostsResponseDTO dto = new PostsResponseDTO(
                         postSaved.getId(),
@@ -57,7 +57,7 @@ public class PostController {
                         HttpStatus.CREATED,
                         dto
                 );
-                return new ResponseEntity<APIResponse<PostsResponseDTO>>(response, HttpStatus.CREATED);
+                return new ResponseEntity<>(response, HttpStatus.CREATED);
 
 
             } else {
@@ -70,62 +70,62 @@ public class PostController {
 
     }
 
-    //normal user
-    @PutMapping("/post/update/{id}")
-    public ResponseEntity<APIResponse<PostsResponseDTO>> updatePost(
+    @PutMapping("/{id}")
+    public ResponseEntity<APIResponse<PostsResponseDTO>> updatePosts(
             @RequestBody Post post,
-            @PathVariable Long id,
-            @RequestParam("userId") Long userId) {
-        try {
-            Post existingPost = postService.getPostById(id);
-            User existingUser = userService.getUserById(userId);
+            @PathVariable Long id)
+    {
 
-            if (existingPost == null) {
-                throw new UserNotFoundException("Post not found with ID: " + id);
-            }
-
-            if (existingUser == null) {
-                throw new UserNotFoundException("User not found with ID: " + userId);
-            }
-
-            if (!existingPost.getUserId().equals(userId)) {
-                throw new UnauthorizedException("Post does not belong to user");
-            }
-
-            if (post.getContent() != null && !post.getContent().trim().isEmpty()) {
-                existingPost.setContent(post.getContent());
-            }
-            if (existingPost.getDeletedAt() != null) {
-                throw new IllegalStateException("can not updated deleted post..");
-            }
-
-
-            existingPost.setUpdatedAt(LocalDateTime.now());
-            Post updatedPost = postService.updatePost(existingPost);
-
-            PostsResponseDTO dto = new PostsResponseDTO(
-                    updatedPost.getId(),
-                    updatedPost.getUserId(),
-                    updatedPost.getContent(),
-                    updatedPost.getCreatedAt(),
-                    updatedPost.getUpdatedAt()
-            );
-
-            APIResponse<PostsResponseDTO> response = new APIResponse(
-                    "post updated successfully",
-                    HttpStatus.OK,
-                    dto
-            );
-            return new ResponseEntity<APIResponse<PostsResponseDTO>>(response, HttpStatus.OK);
-        } catch (Exception e) {
-            throw e;
-
+        if (post.getUser() != null && post.getUser().getDeletedAt() != null) {
+            throw new UserNotFoundException("User is deleted with ID: " + post.getUser().getId());
         }
+
+        Post existingPost = postService.getPostById(id);
+        if (existingPost == null) {
+            throw new UserNotFoundException("Post not found with ID: " + id);
+        }
+
+        User existingUser = userService.getUserById(post.getUser().getId());
+        if (existingUser == null) {
+            throw new UserNotFoundException("User not found with ID: " + post.getUser().getId());
+        }
+
+        if (!existingPost.getUser().getId().equals(post.getUser().getId())) {
+            throw new UnauthorizedException("Post does not belong to the provided user");
+        }
+
+        if (existingPost.getDeletedAt() != null) {
+            throw new IllegalStateException("Cannot update a deleted post");
+        }
+
+        if (post.getContent() != null && !post.getContent().trim().isEmpty()) {
+            existingPost.setContent(post.getContent().trim());
+        }
+
+        existingPost.setUpdatedAt(LocalDateTime.now());
+
+        Post updatedPost = postService.updatePost(existingPost);
+
+        PostsResponseDTO dto = new PostsResponseDTO(
+                updatedPost.getId(),
+                updatedPost.getUser().getId(),
+                updatedPost.getContent(),
+                updatedPost.getCreatedAt(),
+                updatedPost.getUpdatedAt()
+        );
+
+        APIResponse<PostsResponseDTO> response = new APIResponse<>(
+                "Post updated successfully",
+                HttpStatus.OK,
+                dto
+        );
+
+        return ResponseEntity.ok(response);
     }
 
 
-    @DeleteMapping("/post/delete/{id}")
-    public ResponseEntity<APIResponse<PostsResponseDTO>> deletePost(@PathVariable Long id, @RequestParam("userId") Long userId) {
+    @DeleteMapping("/{id}")
+    public ResponseEntity<APIResponse<PostsResponseDTO>> deletePosts(@PathVariable Long id, @RequestParam("userId") Long userId) {
         try {
             Post existingPost = postService.getPostById(id);
             User existingUser = userService.getUserById(userId);
@@ -134,15 +134,19 @@ public class PostController {
                 throw new UserNotFoundException("User not found with ID: " + userId);
             }
 
-            if (!existingPost.getUserId().equals(userId)) {
+            if (!existingPost.getUser().getId().equals(userId)) {
                 throw new UnauthorizedException("Post does not belong to user");
+            }
+
+            if(existingPost.getDeletedAt() != null){
+                throw new Exception("post is already deleted..");
             }
 
             Post deletedPost = postService.deletePost(id);
 
             PostsResponseDTO dto = new PostsResponseDTO(
                     deletedPost.getId(),
-                    deletedPost.getUserId(),
+                    deletedPost.getUser().getId(),
                     deletedPost.getContent(),
                     deletedPost.getCreatedAt(),
                     deletedPost.getUpdatedAt()
@@ -164,14 +168,14 @@ public class PostController {
     }
 
 
-    @GetMapping("user/posts/{userId}")
+    @GetMapping("user/{userId}")
     public ResponseEntity<APIResponse<List<PostsResponseDTO>>> getAllPostByUserId(@PathVariable Long userId) {
         try {
             List<Post> allPosts = postService.getAllPosts(userId);
             List<PostsResponseDTO> responseDTOList = allPosts.stream()
                     .map(post -> new PostsResponseDTO(
                             post.getId(),
-                            post.getUserId(),
+                            post.getUser().getId(),
                             post.getContent(),
                             post.getCreatedAt(),
                             post.getUpdatedAt()
