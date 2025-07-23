@@ -1,7 +1,9 @@
 package com.liquibase.demo.service.postServices;
 
 import com.liquibase.demo.dto.PostsResponseDTO;
+import com.liquibase.demo.exception.UserNotFoundException;
 import com.liquibase.demo.model.Post;
+import com.liquibase.demo.model.User;
 import com.liquibase.demo.repository.PostRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -32,7 +34,7 @@ public class PostServiceImpl implements PostService {
 
         return new PostsResponseDTO(
                 savedPost.getId(),
-                savedPost.getUserId(),
+                savedPost.getUser().getId(),
                 savedPost.getContent(),
                 savedPost.getCreatedAt(),
                 savedPost.getUpdatedAt()

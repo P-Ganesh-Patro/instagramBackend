@@ -16,14 +16,17 @@ public class Reaction {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "user_id", nullable = false)
-    private Long userId;
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "user_id")
+    private User user;
 
-    @Column(name = "reaction_type_id", nullable = false)
-    private Long reactionTypeId;
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "reaction_type_id")
+    private ReactionType reactionType;
 
-    @Column(name = "comment_id", nullable = false)
-    private Long commentId;
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "comment_id")
+    private Comment comment;
 
     @Column(name = "reacted_type")
     private String reactedType;
@@ -38,67 +41,4 @@ public class Reaction {
     private LocalDateTime deletedAt;
 
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
-
-    public Long getReactionTypeId() {
-        return reactionTypeId;
-    }
-
-    public void setReactionTypeId(Long reactionTypeId) {
-        this.reactionTypeId = reactionTypeId;
-    }
-
-    public Long getCommentId() {
-        return commentId;
-    }
-
-    public void setCommentId(Long commentId) {
-        this.commentId = commentId;
-    }
-
-    public String getReactedType() {
-        return reactedType;
-    }
-
-    public void setReactedType(String reactedType) {
-        this.reactedType = reactedType;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-
-    public LocalDateTime getDeletedAt() {
-        return deletedAt;
-    }
-
-    public void setDeletedAt(LocalDateTime deletedAt) {
-        this.deletedAt = deletedAt;
-    }
 }

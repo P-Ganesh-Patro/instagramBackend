@@ -11,7 +11,10 @@ public interface CommentService {
 
     List<CommentResponseDTO> getCommentsByPostId(Long postId);
 
-    List<CommentResponseDTO> getCommentsByUserId(Long userId);
+//    List<CommentResponseDTO> getCommentsByUserId(Long userId);
 
     CommentResponseDTO deleteComment(Long commentId);
+
+    CommentResponseDTO updateComment(Comment comment);
+
 }

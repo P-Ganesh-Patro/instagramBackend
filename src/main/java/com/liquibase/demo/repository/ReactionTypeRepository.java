@@ -6,5 +6,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ReactionTypeRepository extends JpaRepository<ReactionType, Long> {
+
     ReactionType findByReactionType(Enum<?> reactionType);
 }

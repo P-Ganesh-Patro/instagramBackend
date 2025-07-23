@@ -2,11 +2,14 @@ package com.liquibase.demo.model;
 
 
 import jakarta.persistence.*;
+import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "group_role")
+@Data
 public class GroupRole {
 
     @Id
@@ -24,35 +27,8 @@ public class GroupRole {
     private LocalDateTime updatedAt;
 
 
-    public Long getId() {
-        return id;
-    }
+    @OneToMany(mappedBy = "role")
+    private List<GroupMember> groupMembers;
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public GroupRoleType getGroupRoleType() {
-        return groupRoleType;
-    }
-
-    public void setGroupRoleType(GroupRoleType groupRoleType) {
-        this.groupRoleType = groupRoleType;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
-    }
+   
 }
