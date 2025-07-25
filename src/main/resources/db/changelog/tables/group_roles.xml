@@ -32,4 +32,43 @@
 
     </changeSet>
 
+    <changeSet id="insert-group-roles" author="ganesh" runOnChange="false" runAlways="false">
+
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <rowCount tableName="group_roles" expectedRows="5"/>
+            </not>
+        </preConditions>
+
+        <insert tableName="group_roles">
+            <column name="group_role_type" value="OWNER"/>
+            <column name="description" value="Group owner"/>
+            <column name="created_at" valueDate="CURRENT_TIMESTAMP"/>
+        </insert>
+
+        <insert tableName="group_roles">
+            <column name="group_role_type" value="ADMIN"/>
+            <column name="description" value="Group admin"/>
+            <column name="created_at" valueDate="CURRENT_TIMESTAMP"/>
+        </insert>
+
+        <insert tableName="group_roles">
+            <column name="group_role_type" value="MODERATOR"/>
+            <column name="description" value="Group moderator"/>
+            <column name="created_at" valueDate="CURRENT_TIMESTAMP"/>
+        </insert>
+
+        <insert tableName="group_roles">
+            <column name="group_role_type" value="MUTEDUSER"/>
+            <column name="description" value="Muted group member"/>
+            <column name="created_at" valueDate="CURRENT_TIMESTAMP"/>
+        </insert>
+
+        <insert tableName="group_roles">
+            <column name="group_role_type" value="MEMBER"/>
+            <column name="description" value="Regular group member"/>
+            <column name="created_at" valueDate="CURRENT_TIMESTAMP"/>
+        </insert>
+    </changeSet>
+
 </databaseChangeLog>

@@ -42,4 +42,9 @@ public class Group {
     private List<GroupPost> groupPosts;
 
 
+    @PrePersist
+    public void createdAt() {
+        this.created_At = LocalDateTime.now();
+    }
+
 }

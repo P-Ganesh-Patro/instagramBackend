@@ -23,4 +23,9 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ex.getMessage());
     }
 
+    @ExceptionHandler(MaximumUploadSizeExceed.class)
+    public ResponseEntity<String> handleMaximumSize(MaximumUploadSizeExceed e) {
+        return ResponseEntity.status(HttpStatus.INSUFFICIENT_STORAGE).body("File size exceeds the maximum limit allowed!");
+    }
+
 }
