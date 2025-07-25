@@ -1,14 +1,20 @@
 package com.liquibase.demo.service.postServices;
 
+import com.liquibase.demo.dto.PostAndPostMediaDTO;
+import com.liquibase.demo.dto.PostMediaDTO;
 import com.liquibase.demo.dto.PostsResponseDTO;
 import com.liquibase.demo.exception.UserNotFoundException;
 import com.liquibase.demo.model.Post;
+import com.liquibase.demo.model.PostMedia;
 import com.liquibase.demo.model.User;
 import com.liquibase.demo.repository.PostRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -21,6 +27,9 @@ public class PostServiceImpl implements PostService {
     @Autowired
     private PostRepository postRepository;
 
+    @Autowired
+    private CloudinaryService cloudinaryService;
+
 
     @Override
     public List<Post> getAllPosts(Long id) {
@@ -29,22 +38,81 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public PostsResponseDTO createPost(Post post) {
-        Post savedPost = postRepository.save(post);
+    public PostAndPostMediaDTO createPost(Post post, List<MultipartFile> files) throws IOException {
 
-        return new PostsResponseDTO(
-                savedPost.getId(),
-                savedPost.getUser().getId(),
-                savedPost.getContent(),
-                savedPost.getCreatedAt(),
-                savedPost.getUpdatedAt()
+        List<PostMedia> postMediaList = new ArrayList<>();
+        if (files != null) {
+            for (MultipartFile file : files) {
+                String url = cloudinaryService.upload(file);
+                String mediaType = file.getContentType();
+
+                PostMedia postMedia = new PostMedia();
+                postMedia.setMediaUrl(url);
+                postMedia.setPost(post);
+                postMedia.setMediaType(mediaType);
+
+                postMediaList.add(postMedia);
+
+            }
+        }
+        post.setMedia(postMediaList);
+
+        Post savePost = postRepository.save(post);
+
+        List<PostMediaDTO> mediaDTOList = savePost.getMedia().stream()
+                .map(media -> new PostMediaDTO(media.getMediaUrl(), media.getMediaType()))
+                .toList();
+
+        return new PostAndPostMediaDTO(
+                savePost.getId(),
+                savePost.getUser().getId(),
+                savePost.getContent(),
+                savePost.getCreatedAt(),
+                savePost.getUpdatedAt(),
+                mediaDTOList
         );
-
     }
 
     @Override
-    public Post updatePost(Post post) {
-        return postRepository.save(post);
+    public PostAndPostMediaDTO updatePost(Post post, List<MultipartFile> files) {
+        try {
+            List<PostMedia> postMediaList = new ArrayList<>();
+            if (files != null && !files.isEmpty()) {
+                for (MultipartFile file : files) {
+                    String url = cloudinaryService.upload(file);
+                    String mediaType = file.getContentType();
+
+                    PostMedia postMedia = new PostMedia();
+                    postMedia.setMediaUrl(url);
+                    postMedia.setPost(post);
+                    postMedia.setMediaType(mediaType);
+                    postMedia.setUpdatedAt(LocalDateTime.now());
+
+                    postMediaList.add(postMedia);
+
+                }
+                post.setMedia(postMediaList);
+
+            }
+            Post savedPost = postRepository.save(post);
+
+            List<PostMediaDTO> mediaDTOList = savedPost.getMedia().stream()
+                    .map(media -> new PostMediaDTO(media.getMediaUrl(), media.getMediaType()))
+                    .toList();
+
+            PostAndPostMediaDTO postAndPostMediaDTO = new PostAndPostMediaDTO(
+                    savedPost.getId(),
+                    savedPost.getUser().getId(),
+                    savedPost.getContent(),
+                    savedPost.getCreatedAt(),
+                    savedPost.getUpdatedAt(),
+                    mediaDTOList
+            );
+            return postAndPostMediaDTO;
+
+        } catch (IOException e) {
+            throw new RuntimeException("error while update:- " + e.getMessage());
+        }
     }
 
     @Override

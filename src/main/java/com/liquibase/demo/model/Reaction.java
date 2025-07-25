@@ -1,6 +1,7 @@
 package com.liquibase.demo.model;
 
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.springframework.cglib.core.Local;
@@ -24,8 +25,9 @@ public class Reaction {
     @JoinColumn(name = "reaction_type_id")
     private ReactionType reactionType;
 
-    @ManyToOne(optional = false)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "comment_id")
+    @JsonBackReference
     private Comment comment;
 
     @Column(name = "reacted_type")

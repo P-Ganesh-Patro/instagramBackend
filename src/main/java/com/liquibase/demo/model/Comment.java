@@ -1,6 +1,8 @@
 package com.liquibase.demo.model;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -18,6 +20,7 @@ public class Comment {
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonIgnore
     private User user;
 
     @ManyToOne
@@ -40,7 +43,8 @@ public class Comment {
     private LocalDateTime deletedAt;
 
 
-    @OneToMany(mappedBy = "comment")
+    @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL)
+    @JsonManagedReference
     private List<Reaction> reactions;
 
     @PrePersist

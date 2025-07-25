@@ -13,8 +13,7 @@ public class GroupMember {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-
+    
     @ManyToOne
     @JoinColumn(name = "group_id", nullable = false)
     private Group group;
@@ -33,5 +32,10 @@ public class GroupMember {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @PrePersist
+    public void createdAt() {
+        this.createdAt = LocalDateTime.now();
+    }
 
 }

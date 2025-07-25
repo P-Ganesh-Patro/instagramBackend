@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
-@Table(name = "group_role")
+@Table(name = "group_roles")
 @Data
 public class GroupRole {
 
