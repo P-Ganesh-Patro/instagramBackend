@@ -1,5 +1,6 @@
 package com.liquibase.demo.repository;
 
+import com.liquibase.demo.dto.LoginDTO;
 import com.liquibase.demo.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

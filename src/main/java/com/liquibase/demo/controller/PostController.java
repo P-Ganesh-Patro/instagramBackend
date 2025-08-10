@@ -12,6 +12,8 @@ import com.liquibase.demo.response.APIResponse;
 import com.liquibase.demo.service.authService.AuthServiceImpl;
 import com.liquibase.demo.service.postServices.PostService;
 import com.liquibase.demo.service.userServices.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -30,6 +32,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/posts")
 @AllArgsConstructor
+@Tag(name = "Create Post Files")
 public class PostController {
 
     private final PostService postService;
@@ -39,13 +42,13 @@ public class PostController {
     private final AuthServiceImpl authService;
 
 
+    @Operation(summary = "create posts (images/videos)")
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<APIResponse<PostAndPostMediaDTO>> createPosts(
             @RequestPart("posts") String postJson,
             @RequestPart(value = "file", required = false) List<MultipartFile> files,
             @RequestParam String userNameOrEmail,
             @RequestParam String password) {
-
         try {
             ObjectMapper mapper = new ObjectMapper();
             Post post = mapper.readValue(postJson, Post.class);
@@ -75,6 +78,7 @@ public class PostController {
     }
 
 
+    @Operation(summary = "update posts (images/videos)")
     @PutMapping("/{id}")
     public ResponseEntity<APIResponse<PostAndPostMediaDTO>> updatePosts(
             @RequestPart("posts") String postContent,
@@ -120,6 +124,7 @@ public class PostController {
     }
 
 
+    @Operation(summary = "delete posts (images/videos)")
     @DeleteMapping("/{id}")
     public ResponseEntity<APIResponse<PostsResponseDTO>> deletePosts(
             @PathVariable Long id,
@@ -166,6 +171,7 @@ public class PostController {
     }
 
 
+    @Operation(summary = "get all post by userId")
     @GetMapping("/user/{userId}")
     public ResponseEntity<APIResponse<List<Post>>> getAllPostByUserId(@PathVariable Long userId) {
         try {

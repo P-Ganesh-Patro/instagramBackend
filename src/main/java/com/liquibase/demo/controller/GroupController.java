@@ -9,6 +9,8 @@ import com.liquibase.demo.exception.UserNotFoundException;
 import com.liquibase.demo.model.Group;
 import com.liquibase.demo.response.APIResponse;
 import com.liquibase.demo.service.groupService.GroupService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,12 +20,14 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/groups")
+@Tag(name = "Group")
 public class GroupController {
 
     @Autowired
     private GroupService groupService;
 
 
+    @Operation(summary = "Group create")
     @PostMapping
     public ResponseEntity<APIResponse<GroupResponseDTO>> createGroup(@RequestBody GroupRequestDTO requestDTO) {
 
@@ -37,6 +41,7 @@ public class GroupController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @Operation(summary = "get all groups")
     @GetMapping
     public ResponseEntity<APIResponse<List<GroupResponseDTO>>> getAllGroups() {
         List<GroupResponseDTO> allGroups = groupService.getAllGroups();
@@ -48,6 +53,7 @@ public class GroupController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @Operation(summary = "get Group by Id ")
     @GetMapping("/{id}")
     public ResponseEntity<APIResponse<GroupResponseDTO>> getGroupById(@PathVariable Long id) {
         GroupResponseDTO groupResponseDTO = groupService.getGroupById(id);
@@ -70,6 +76,7 @@ public class GroupController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @Operation(summary = "update group name")
     @PutMapping("/{id}")
     public ResponseEntity<APIResponse<GroupResponseDTO>> updateGroupNameById(@PathVariable Long id, @RequestBody GroupUpdateRequestDTO groupRequestDTO) {
         GroupResponseDTO group = groupService.getGroupById(id);
@@ -88,6 +95,8 @@ public class GroupController {
 
     }
 
+
+    @Operation(summary = "delete group by id")
     @DeleteMapping("/{id}")
     public ResponseEntity<APIResponse<GroupDeletedResponse>> deleteGroup(@PathVariable Long id) {
         GroupDeletedResponse group = groupService.deleteGroup(id);

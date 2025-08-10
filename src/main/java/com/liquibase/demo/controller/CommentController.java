@@ -1,11 +1,14 @@
 package com.liquibase.demo.controller;
 
 import com.liquibase.demo.dto.CommentResponseDTO;
+import com.liquibase.demo.dto.CreateCommentDTO;
 import com.liquibase.demo.exception.UserNotFoundException;
 import com.liquibase.demo.model.Comment;
 import com.liquibase.demo.response.APIResponse;
 import com.liquibase.demo.service.commentService.CommentService;
 import com.liquibase.demo.service.commentService.CommentServiceImpl;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,12 +19,14 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/comments")
 @AllArgsConstructor
+@Tag(name = "Post Comments")
 public class CommentController {
 
     private final CommentServiceImpl commentService;
 
+    @Operation(summary = "create comments")
     @PostMapping
-    public ResponseEntity<APIResponse<CommentResponseDTO>> createComment(@RequestBody Comment comment) {
+    public ResponseEntity<APIResponse<CommentResponseDTO>> createComment(@RequestBody CreateCommentDTO comment) {
         CommentResponseDTO created = commentService.createComment(comment);
         APIResponse<CommentResponseDTO> response = new APIResponse<>(
                 "Comment created successfully",
@@ -31,9 +36,10 @@ public class CommentController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PutMapping
-    public ResponseEntity<APIResponse<CommentResponseDTO>> updateComment(@RequestBody Comment comment) {
-        CommentResponseDTO updated = commentService.updateComment(comment);
+    @Operation(summary = "update comment")
+    @PutMapping("/{id}")
+    public ResponseEntity<APIResponse<CommentResponseDTO>> updateComment(@PathVariable Long id, @RequestBody CreateCommentDTO comment) {
+        CommentResponseDTO updated = commentService.updateComment(id, comment);
 
         APIResponse<CommentResponseDTO> response = new APIResponse<>("comment update successfully", HttpStatus.OK, updated);
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -41,6 +47,7 @@ public class CommentController {
     }
 
 
+    @Operation(summary = "get comment by id")
     @GetMapping("/{postId}")
     public ResponseEntity<APIResponse<List<CommentResponseDTO>>> getCommentsByPost(@PathVariable Long postId) {
         List<CommentResponseDTO> comments = commentService.getCommentsByPostId(postId);
@@ -57,6 +64,8 @@ public class CommentController {
 //        );
 //    }
 
+
+    @Operation(summary = "delete comment by id")
     @DeleteMapping("/{commentId}")
     public ResponseEntity<APIResponse<CommentResponseDTO>> deleteComment(@PathVariable Long commentId) {
         CommentResponseDTO deleted = commentService.deleteComment(commentId);

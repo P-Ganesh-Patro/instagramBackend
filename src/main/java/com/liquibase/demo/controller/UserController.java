@@ -5,8 +5,9 @@ import com.liquibase.demo.dto.SignUpDTO;
 import com.liquibase.demo.exception.UserNotFoundException;
 import com.liquibase.demo.model.User;
 import com.liquibase.demo.response.APIResponse;
-import com.liquibase.demo.response.ResponseHandler;
 import com.liquibase.demo.service.userServices.UserServiceImpl;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,10 +17,11 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/user")
 @AllArgsConstructor
+@Tag(name = "User APIs", description = "update, delete & fetch- users")
 public class UserController {
-
     private UserServiceImpl userServiceImpl;
 
+    @Operation(summary = "update user by id")
     @PutMapping("/update/{id}")
     public ResponseEntity<APIResponse<SignUpDTO>> updateUser(@PathVariable Long id, @RequestBody User user) {
         try {
@@ -31,7 +33,8 @@ public class UserController {
                     updatedUser.getUserName(),
                     updatedUser.getFirstName(),
                     updatedUser.getLastName(),
-                    updatedUser.getEmail()
+                    updatedUser.getEmail(),
+                    updatedUser.getDOB()
             );
 
             APIResponse<SignUpDTO> response = new APIResponse<>("User updated successfully", HttpStatus.OK, dto);
@@ -46,6 +49,7 @@ public class UserController {
     }
 
 
+    @Operation(summary = "delete user by id")
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<APIResponse<SignUpDTO>> deleteUser(@PathVariable Long id) {
         try {
@@ -56,7 +60,9 @@ public class UserController {
                     deletedUser.getUserName(),
                     deletedUser.getFirstName(),
                     deletedUser.getLastName(),
-                    deletedUser.getEmail()
+                    deletedUser.getEmail(),
+                    deletedUser.getDOB()
+
             );
 
             APIResponse<SignUpDTO> response = new APIResponse<>("User deleted successfully", HttpStatus.OK, dto);
@@ -72,6 +78,7 @@ public class UserController {
     }
 
 
+    @Operation(summary = "Get user by id")
     @GetMapping("/{id}")
     public ResponseEntity<APIResponse<SignUpDTO>> userGetById(@PathVariable Long id) {
         try {
@@ -81,7 +88,8 @@ public class UserController {
                     user.getUserName(),
                     user.getFirstName(),
                     user.getLastName(),
-                    user.getEmail()
+                    user.getEmail(),
+                    user.getDOB()
             );
             APIResponse<SignUpDTO> response = new APIResponse<>(
                     "user fetched successfully",
