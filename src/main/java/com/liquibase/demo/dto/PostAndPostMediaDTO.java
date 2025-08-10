@@ -12,7 +12,6 @@ import java.util.List;
 @NoArgsConstructor
 public class PostAndPostMediaDTO {
 
-
     private Long id;
     private Long userId;
     private String content;

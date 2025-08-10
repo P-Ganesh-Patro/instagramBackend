@@ -58,5 +58,10 @@
 
     </changeSet>
 
-    
+    <changeSet id="add_dob" author="ganesh">
+        <addColumn tableName="users">
+            <column type="DATETIME" name="date_of_birth">
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

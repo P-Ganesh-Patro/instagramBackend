@@ -11,4 +11,5 @@ public class GroupResponseDTO {
     private String description;
     private String createdByName;
     private LocalDateTime createdAt;
+
 }

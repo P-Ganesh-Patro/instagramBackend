@@ -1,5 +1,6 @@
 package com.liquibase.demo.service.authService;
 
+import com.liquibase.demo.dto.LoginDTO;
 import com.liquibase.demo.model.User;
 import org.springframework.http.ResponseEntity;
 

@@ -21,5 +21,4 @@ public class LoginDTO {
     private List<Comment> comment;
     private List<Post> post;
     private List<Reaction> reaction;
-
 }

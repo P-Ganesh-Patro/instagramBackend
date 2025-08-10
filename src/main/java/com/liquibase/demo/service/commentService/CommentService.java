@@ -1,13 +1,14 @@
 package com.liquibase.demo.service.commentService;
 
 import com.liquibase.demo.dto.CommentResponseDTO;
+import com.liquibase.demo.dto.CreateCommentDTO;
 import com.liquibase.demo.model.Comment;
 
 import java.util.List;
 
 public interface CommentService {
 
-    CommentResponseDTO createComment(Comment comment);
+    CommentResponseDTO createComment(CreateCommentDTO comment);
 
     List<CommentResponseDTO> getCommentsByPostId(Long postId);
 
@@ -15,6 +16,6 @@ public interface CommentService {
 
     CommentResponseDTO deleteComment(Long commentId);
 
-    CommentResponseDTO updateComment(Comment comment);
+    CommentResponseDTO updateComment(Long id, CreateCommentDTO comment);
 
 }
